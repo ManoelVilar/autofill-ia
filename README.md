@@ -1,4 +1,8 @@
-# ⚡ AutoFill IA — extensão para Chrome / Edge / Brave
+<p align="center"><img src="assets/capa.png" alt="AutoFill IA: preenche qualquer formulário em 1 clique ou no automático" width="100%"></p>
+
+# AutoFill IA
+
+Extensão para Chrome, Edge e Brave.
 
 Identifica automaticamente os campos de qualquer formulário e preenche com seus dados: em 1 clique ou 100% automático. Quando o campo é “estranho” (nome aleatório, rótulo diferente), usa uma IA gratuita para descobrir o que ele pede.
 
