@@ -1,0 +1,32 @@
+:root { --bg:#fff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#4f46e5; --card:#f9fafb; }
+@media (prefers-color-scheme: dark) { :root { --bg:#111318; --fg:#e5e7eb; --muted:#9ca3af; --line:#2a2e37; --card:#181b22; --accent:#818cf8; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1 { font-size:20px; margin:0 0 6px; }
+h2 { font-size:15px; margin:0 0 10px; }
+a { color:var(--accent); }
+.muted { color:var(--muted); } .small { font-size:12px; }
+.ok { color:#16a34a; } .err { color:#dc2626; }
+.tag { font-size:11px; font-weight:500; background:var(--card); border:1px solid var(--line); border-radius:99px; padding:1px 8px; color:var(--muted); }
+button { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; font:600 13px inherit; cursor:pointer; }
+button.secondary { background:transparent; color:var(--fg); border:1px solid var(--line); }
+input, select, textarea { width:100%; margin-top:4px; padding:7px 9px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--fg); font:inherit; }
+input[type=checkbox], input[type=radio] { width:auto; margin:0 6px 0 0; }
+label { display:block; font-size:12px; color:var(--muted); }
+label.row, .modes label { display:flex; align-items:center; color:var(--fg); font-size:13px; margin:6px 0; }
+
+/* Página de opções */
+.page { max-width:760px; margin:0 auto; padding:28px 20px 90px; }
+.page header { margin-bottom:18px; }
+.page section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:14px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; }
+.page footer { position:fixed; left:0; right:0; bottom:0; padding:12px 20px; background:var(--bg); border-top:1px solid var(--line); text-align:center; }
+
+/* Popup */
+.popup { width:290px; padding:14px; }
+.popup #fill { width:100%; padding:10px; margin:6px 0 4px; }
+.popup #status { min-height:18px; margin:4px 0 10px; }
+.seg { display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:10px; }
+.seg button { flex:1; background:transparent; color:var(--fg); border-radius:0; padding:7px 4px; font-weight:500; font-size:12px; }
+.seg button.active { background:var(--accent); color:#fff; }
+.links { margin-bottom:4px; }

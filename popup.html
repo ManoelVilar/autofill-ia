@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="popup">
+  <h1>⚡ AutoFill IA</h1>
+  <button id="fill">Preencher esta página</button>
+  <label class="row small"><input type="checkbox" id="overwrite"> Sobrescrever campos já preenchidos</label>
+  <div id="status" class="small muted"></div>
+
+  <div class="seg" id="modes">
+    <button data-mode="click">1 clique</button>
+    <button data-mode="auto">Automático</button>
+    <button data-mode="off">Manual</button>
+  </div>
+
+  <div class="links small">
+    <a href="#" id="toggleSite">Ignorar este site</a> ·
+    <a href="#" id="relearn">Reaprender campos</a> ·
+    <a href="#" id="opts">Meus dados</a>
+  </div>
+  <p class="small muted">Atalho: Alt+Shift+F</p>
+  <script src="popup.js"></script>
+</body>
+</html>

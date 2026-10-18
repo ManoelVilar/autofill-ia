@@ -1,0 +1,239 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bancada AutoFill IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: bancada de testes — placar fixo no topo, casos de teste empilhados em colunas de campos */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --fg: #141a2b;
+  --muted: #5d6680;
+  --line: #dde2ee;
+  --field: #f8f9fc;
+  --accent: #2f4fd8;
+  --ok: #1a8a4c;
+  --ok-bg: #e3f5ea;
+  --bad: #c4352b;
+  --bad-bg: #fbe6e3;
+  --wait-bg: #eceff6;
+  --ai: #8a5a00;
+  --ai-bg: #fff2d6;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f131c; --surface: #171c28; --fg: #e6e9f2; --muted: #98a1b8; --line: #2a3142; --field: #1d2331;
+    --accent: #7d95ff; --ok: #5bd18f; --ok-bg: #173325; --bad: #ff8a80; --bad-bg: #3a1d1b; --wait-bg: #232a3a;
+    --ai: #ffcf70; --ai-bg: #3a2e14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f131c; --surface: #171c28; --fg: #e6e9f2; --muted: #98a1b8; --line: #2a3142; --field: #1d2331;
+  --accent: #7d95ff; --ok: #5bd18f; --ok-bg: #173325; --bad: #ff8a80; --bad-bg: #3a1d1b; --wait-bg: #232a3a;
+  --ai: #ffcf70; --ai-bg: #3a2e14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+header.top { padding-block: 28px 18px; }
+h1 { font-size: 1.75rem; margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance; }
+.lead { color: var(--muted); margin: 0; max-width: 64ch; }
+kbd { font: 500 0.82em var(--mono); background: var(--surface); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; }
+
+.score { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.score .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding-block: 12px; }
+.meter { display: flex; align-items: baseline; gap: 8px; }
+.meter b { font: 600 1.35rem var(--mono); font-variant-numeric: tabular-nums; }
+.meter span { color: var(--muted); font-size: 0.85rem; }
+.meter.ok b { color: var(--ok); } .meter.bad b { color: var(--bad); }
+.score .spacer { flex: 1; }
+button { font: 600 0.88rem var(--sans); border-radius: 8px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+main { display: grid; gap: 16px; padding-block: 20px 60px; }
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+.case-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.case-head h2 { font-size: 1.05rem; margin: 0; }
+.case-head p { color: var(--muted); font-size: 0.86rem; margin: 0; flex-basis: 100%; }
+.tag { font: 500 0.72rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 99px; background: var(--wait-bg); color: var(--muted); }
+.tag.ai { background: var(--ai-bg); color: var(--ai); }
+.tag.trap { background: var(--bad-bg); color: var(--bad); }
+
+form.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px 16px; margin: 0; }
+.row { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 8px; row-gap: 4px; align-items: center; min-width: 0; }
+.row > label, .row > .lbl { grid-column: 1 / -1; font-size: 0.82rem; font-weight: 500; color: var(--muted); }
+.row > input, .row > select, .row > textarea { grid-column: 1; min-width: 0; width: 100%; font: 0.95rem var(--sans); color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; }
+.row > textarea { resize: vertical; min-height: 40px; }
+.code { font: 0.72rem var(--mono); color: var(--muted); grid-column: 1 / -1; overflow-wrap: anywhere; }
+.chip { grid-column: 2; grid-row: 2; font: 500 0.7rem var(--mono); padding: 3px 7px; border-radius: 6px; white-space: nowrap; background: var(--wait-bg); color: var(--muted); }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.state { font: 0.8rem var(--mono); color: var(--muted); }
+.state b { color: var(--fg); font-weight: 500; }
+.note { font-size: 0.82rem; color: var(--muted); margin: 0; }
+#dyn-slot:empty::before { content: "A etapa 2 aparece sozinha 3 segundos depois de abrir a página."; color: var(--muted); font-size: 0.86rem; }
+@media (prefers-reduced-motion: no-preference) { .appear { animation: in .4s ease; } @keyframes in { from { opacity: .3; transform: translateY(4px); } } }
+</style></head><body>
+
+<header class="top wrap">
+  <h1>Bancada AutoFill IA</h1>
+  <p class="lead">Formulários de teste para a extensão. Clique num campo e use o botão <b>⚡ Preencher</b>, use o ícone da extensão ou aperte <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>. O placar abaixo confere tudo sozinho.</p>
+</header>
+
+<div class="score">
+  <div class="wrap">
+    <div class="meter" id="m-heur"><b>0/0</b><span>heurística</span></div>
+    <div class="meter" id="m-ia"><b>0/0</b><span>só com IA</span></div>
+    <div class="meter" id="m-trap"><b>0/0</b><span>armadilhas intactas</span></div>
+    <div class="spacer"></div>
+    <button type="button" id="reset">Limpar tudo</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="case">
+    <div class="case-head"><h2>1. Site bem feito</h2><span class="tag">heurística</span>
+      <p>Campos com o atributo <code>autocomplete</code> padrão do HTML. É o caso mais fácil.</p></div>
+    <form class="grid" id="f1">
+      <div class="row"><label for="c1">Name</label><input id="c1" autocomplete="name" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="c2">Email</label><input id="c2" type="email" autocomplete="email" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="c3">Phone</label><input id="c3" type="tel" autocomplete="tel" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="c4">ZIP</label><input id="c4" autocomplete="postal-code" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+    </form>
+  </section>
+
+  <section class="case">
+    <div class="case-head"><h2>2. Cadastro brasileiro</h2><span class="tag">heurística</span>
+      <p>Rótulos em português, sem <code>autocomplete</code>. Inclui data no formato do navegador e selects de UF, país e gênero.</p></div>
+    <form class="grid" id="f2">
+      <div class="row"><label for="p1">Nome completo *</label><input id="p1" name="nm_cliente" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p2">CPF</label><input id="p2" name="doc" placeholder="000.000.000-00" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p3">Data de nascimento</label><input id="p3" type="date" name="dt" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p4">WhatsApp</label><input id="p4" name="zap" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p5">CEP</label><input id="p5" name="c" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p6">Número</label><input id="p6" name="n" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      <div class="row"><label for="p7">UF</label>
+        <select id="p7" name="uf" data-expect="fill" data-group="heur">
+          <option value="">Selecione</option><option value="1">Bahia</option><option value="2">Ceará</option><option value="3">Paraíba</option><option value="4">Pernambuco</option><option value="5">Rio de Janeiro</option><option value="6">São Paulo</option>
+        </select><span class="chip"></span></div>
+      <div class="row"><label for="p8">País</label>
+        <select id="p8" name="pais" data-expect="fill" data-group="heur"><option value="">Selecione</option><option value="AR">Argentina</option><option value="BR">Brasil</option><option value="PT">Portugal</option></select><span class="chip"></span></div>
+      <div class="row"><label for="p9">Sexo</label>
+        <select id="p9" name="sx" data-expect="fill" data-group="heur"><option value="">Selecione</option><option value="F">Feminino</option><option value="M">Masculino</option><option value="O">Outro</option></select><span class="chip"></span></div>
+    </form>
+    <p class="note">Os três selects só preenchem se você cadastrou estado, país e gênero em “Meus dados”.</p>
+  </section>
+
+  <section class="case">
+    <div class="case-head"><h2>3. Site bagunçado</h2><span class="tag">heurística</span>
+      <p>Sem <code>&lt;label&gt;</code> ligado ao campo. A pista está no placeholder, no <code>aria-label</code>, no nome interno ou num texto solto ao lado.</p></div>
+    <form class="grid" id="f3">
+      <div class="row"><span class="lbl">Contato</span><input name="fld_x1" placeholder="Seu melhor e-mail" data-expect="fill" data-group="heur"><span class="code">placeholder</span><span class="chip"></span></div>
+      <div class="row"><span class="lbl">Endereço</span><input name="txt_logradouro" data-expect="fill" data-group="heur"><span class="code">name="txt_logradouro"</span><span class="chip"></span></div>
+      <div class="row"><span class="lbl">Bairro</span><input name="q7" data-expect="fill" data-group="heur"><span class="code">texto ao lado</span><span class="chip"></span></div>
+      <div class="row"><span class="lbl">&nbsp;</span><input aria-label="Cidade" name="q8" data-expect="fill" data-group="heur"><span class="code">aria-label</span><span class="chip"></span></div>
+      <div class="row"><span class="lbl">&nbsp;</span><input name="lastName" placeholder="" data-expect="fill" data-group="heur"><span class="code">name="lastName"</span><span class="chip"></span></div>
+      <div class="row"><span class="lbl">Controlado (estilo React)</span><input id="react" data-expect="fill" data-group="heur" placeholder="Primeiro nome"><span class="code">só aceita valor via evento</span><span class="chip"></span></div>
+    </form>
+    <p class="state">Estado interno do campo React: <b id="react-state">(vazio)</b></p>
+  </section>
+
+  <section class="case">
+    <div class="case-head"><h2>4. Perguntas em linguagem natural</h2><span class="tag ai">precisa de IA</span>
+      <p>Nenhuma palavra-chave conhecida. Só passa com a IA ativada nas configurações. Sem IA, o esperado é ficarem vazios.</p></div>
+    <form class="grid" id="f4">
+      <div class="row"><label for="a1">Como devemos te chamar?</label><input id="a1" name="k1" data-expect="fill" data-group="ia"><span class="chip"></span></div>
+      <div class="row"><label for="a2">Para onde enviamos a confirmação?</label><input id="a2" name="k2" placeholder="voce@..." data-expect="fill" data-group="ia"><span class="chip"></span></div>
+      <div class="row"><label for="a3">Onde você trabalha hoje?</label><input id="a3" name="k3" data-expect="fill" data-group="ia"><span class="chip"></span></div>
+      <div class="row"><label for="a4">O que você faz lá?</label><input id="a4" name="k4" data-expect="fill" data-group="ia"><span class="chip"></span></div>
+    </form>
+  </section>
+
+  <section class="case">
+    <div class="case-head"><h2>5. Armadilhas</h2><span class="tag trap">devem ficar vazias</span>
+      <p>Campos parecidos com dados do perfil, ou sensíveis. A extensão não pode tocar em nenhum.</p></div>
+    <form class="grid" id="f5">
+      <div class="row"><label for="t1">Estado civil</label><input id="t1" name="estado_civil" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t2">Nome da mãe</label><input id="t2" name="nome_mae" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t3">Senha</label><input id="t3" type="password" name="senha" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t4">CVV do cartão</label><input id="t4" name="cvv" autocomplete="cc-csc" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t5">Código de verificação (SMS)</label><input id="t5" name="otp" autocomplete="one-time-code" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t6">Buscar no site</label><input id="t6" type="search" name="q" data-expect="empty" data-group="trap"><span class="chip"></span></div>
+      <div class="row"><label for="t7">Mensagem</label><textarea id="t7" name="mensagem" data-expect="empty" data-group="trap"></textarea><span class="chip"></span></div>
+    </form>
+  </section>
+
+  <section class="case">
+    <div class="case-head"><h2>6. Etapa carregada depois</h2><span class="tag">modo automático</span>
+      <p>Simula um site de página única: os campos entram na página com atraso. No modo automático, eles devem ser preenchidos sem clique.</p></div>
+    <div id="dyn-slot"></div>
+    <div><button type="button" id="redo">Carregar a etapa 2 de novo</button></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const filled = (el) => (el.value || "").trim() !== "";
+
+  // Campo controlado: só guarda o valor que chega por evento "input", como no React
+  const react = $("#react");
+  let reactState = "";
+  react.addEventListener("input", (e) => { reactState = e.target.value; renderReact(); });
+  function renderReact() {
+    react.value = reactState;
+    $("#react-state").textContent = reactState ? `"${reactState}"` : "(vazio)";
+  }
+
+  function update() {
+    const groups = { heur: [0, 0], ia: [0, 0], trap: [0, 0] };
+    document.querySelectorAll("[data-expect]").forEach((el) => {
+      const want = el.dataset.expect, has = filled(el), g = groups[el.dataset.group];
+      const chip = el.parentElement.querySelector(".chip");
+      const pass = want === "fill" ? has : !has;
+      g[1]++; if (pass) g[0]++;
+      if (!chip) return;
+      if (want === "fill") { chip.textContent = has ? "✔ preenchido" : "aguardando"; chip.className = "chip" + (has ? " ok" : ""); }
+      else { chip.textContent = has ? "✖ não devia" : "✔ intacto"; chip.className = "chip " + (has ? "bad" : "ok"); }
+    });
+    for (const [k, [a, t]] of Object.entries(groups)) {
+      const m = $("#m-" + k);
+      m.querySelector("b").textContent = `${a}/${t}`;
+      m.className = "meter" + (k === "trap" ? (a === t ? " ok" : " bad") : (a === t && t ? " ok" : ""));
+    }
+  }
+
+  function addDynamic() {
+    $("#dyn-slot").innerHTML = `
+      <form class="grid appear" id="f6">
+        <div class="row"><label for="d1">Empresa</label><input id="d1" name="empresa" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+        <div class="row"><label for="d2">Cargo</label><input id="d2" name="cargo" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+        <div class="row"><label for="d3">Complemento</label><input id="d3" name="compl" data-expect="fill" data-group="heur"><span class="chip"></span></div>
+      </form>
+      <p class="note">Empresa, cargo e complemento só preenchem se estiverem cadastrados em “Meus dados”.</p>`;
+    update();
+  }
+  function scheduleDynamic() { $("#dyn-slot").innerHTML = ""; update(); setTimeout(addDynamic, 3000); }
+
+  $("#redo").addEventListener("click", scheduleDynamic);
+  $("#reset").addEventListener("click", () => {
+    document.querySelectorAll("form").forEach((f) => f.reset());
+    reactState = ""; renderReact(); scheduleDynamic();
+  });
+  document.addEventListener("input", update, true);
+  document.addEventListener("change", update, true);
+  setInterval(update, 600); // cobre preenchimentos que não disparam eventos
+  document.querySelectorAll("form").forEach((f) => f.addEventListener("submit", (e) => e.preventDefault()));
+
+  renderReact();
+  scheduleDynamic();
+})();
+</script>
+</body></html>

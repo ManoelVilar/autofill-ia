@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AutoFill IA — Configurações</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page">
+  <header>
+    <h1>⚡ AutoFill IA</h1>
+    <p class="muted">Seus dados ficam só neste navegador (chrome.storage.local). A IA recebe apenas os rótulos dos campos, nunca seus dados.</p>
+  </header>
+
+  <section>
+    <h2>Modo de preenchimento</h2>
+    <div class="modes">
+      <label><input type="radio" name="mode" value="click"> <b>1 clique</b> — mostra o botão “⚡ Preencher” ao focar um campo</label>
+      <label><input type="radio" name="mode" value="auto"> <b>100% automático</b> — preenche sozinho quando o formulário aparece</label>
+      <label><input type="radio" name="mode" value="off"> <b>Só manual</b> — pelo ícone da extensão ou Alt+Shift+F</label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Meus dados</h2>
+    <div id="profile" class="grid"></div>
+    <p class="muted small">Data de nascimento no formato dd/mm/aaaa. Estado pode ser a sigla (PB) ou o nome.</p>
+  </section>
+
+  <section>
+    <h2>IA para campos desconhecidos <span class="tag">opcional</span></h2>
+    <p class="muted">Quando a heurística não reconhece um campo, a IA classifica pelo rótulo. O resultado fica em cache por site, então cada formulário só consulta a IA uma vez.</p>
+    <label class="row"><input type="checkbox" id="aiEnabled"> Ativar IA</label>
+    <div class="grid">
+      <label>Provedor
+        <select id="aiProvider">
+          <option value="gemini">Google Gemini (camada gratuita)</option>
+          <option value="groq">Groq (camada gratuita)</option>
+          <option value="openrouter">OpenRouter (modelos :free)</option>
+          <option value="ollamacloud">Ollama Cloud (chave em ollama.com)</option>
+          <option value="ollama">Ollama (local, 100% grátis/offline)</option>
+        </select>
+      </label>
+      <label>Chave da API <input type="password" id="aiKey" placeholder="cole sua chave aqui" autocomplete="off"></label>
+      <label>Modelo <input type="text" id="aiModel" placeholder="vazio = padrão do provedor"></label>
+      <label id="baseUrlWrap">URL do Ollama <input type="text" id="aiBaseUrl" placeholder="http://localhost:11434/v1/chat/completions"></label>
+    </div>
+    <p class="muted small" id="providerHelp"></p>
+    <button id="testAI" class="secondary">Testar conexão</button> <span id="testResult" class="small"></span>
+  </section>
+
+  <section>
+    <h2>Sites ignorados</h2>
+    <p class="muted small">Um domínio por linha (ex: banco.com.br). O modo automático e o botão não atuam neles.</p>
+    <textarea id="blacklist" rows="4" placeholder="meubanco.com.br"></textarea>
+    <p><button id="clearCache" class="secondary">Limpar cache de campos aprendidos</button></p>
+  </section>
+
+  <footer>
+    <button id="save">Salvar</button> <span id="saved" class="ok"></span>
+  </footer>
+
+  <script src="fields.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
