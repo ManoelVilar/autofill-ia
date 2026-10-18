@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de Privacidade — AutoFill IA</title>
+<link rel="icon" href="icone.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
+<style>
+:root { --bg:#f4f6fb; --card:#fff; --fg:#141a2b; --muted:#5d6680; --line:#dde2ee; --accent:#3a4fd8; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0b1020; --card:#131a2c; --fg:#e6e9f2; --muted:#9aa4bd; --line:#26304a; --accent:#8ea0ff; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width:760px; margin:0 auto; padding:40px max(16px, env(safe-area-inset-left)) 64px; }
+header { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+header img { width:52px; height:52px; border-radius:12px; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0; font-weight:800; }
+.sub { color:var(--muted); margin:2px 0 0; font-size:.92rem; }
+article { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:28px clamp(18px, 4vw, 36px); }
+h2 { font-size:1.12rem; margin:28px 0 8px; }
+h2:first-child { margin-top:0; }
+p, li { max-width:66ch; }
+ul { padding-left:1.2em; }
+li { margin:4px 0; }
+.tldr { background:color-mix(in srgb, var(--accent) 9%, transparent); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:10px; padding:14px 18px; margin-bottom:8px; }
+a { color:var(--accent); }
+footer { color:var(--muted); font-size:.85rem; margin-top:22px; }
+code { font-size:.9em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="icone.png" alt="">
+    <div>
+      <h1>Política de Privacidade</h1>
+      <p class="sub">AutoFill IA · extensão para Chrome, Edge e Brave · atualizada em 18 de outubro de 2026</p>
+    </div>
+  </header>
+
+  <article>
+    <div class="tldr"><b>Resumo:</b> seus dados ficam no seu navegador. O AutoFill IA não tem servidor, não coleta nada e não vende nada. Se você ativar a IA, só os rótulos dos campos são enviados ao provedor que você escolheu, nunca os seus dados.</div>
+
+    <h2>Quais dados a extensão guarda</h2>
+    <p>Os dados que você mesmo digita na página de configurações: nome, e-mail, telefone, documentos (CPF, CNPJ, RG), data de nascimento, endereço, empresa, cargo e links. Também guarda suas configurações, a chave de API da IA (se você informar uma) e uma lista de campos já identificados em cada site.</p>
+    <p>Tudo fica em <code>chrome.storage.local</code>, o armazenamento local do navegador, apenas no seu computador. Nada é sincronizado com a sua conta nem enviado para servidores do AutoFill IA, que não existem.</p>
+
+    <h2>Como os dados são usados</h2>
+    <p>Somente para preencher os formulários das páginas que você visita, no modo que você escolheu (1 clique, automático ou manual). A extensão lê os campos do formulário para saber o que cada um pede e escreve neles os seus dados.</p>
+    <p>Ela nunca preenche campos de senha, cartão de crédito, CVV, código de verificação ou busca.</p>
+
+    <h2>Recurso de IA (opcional, desligado por padrão)</h2>
+    <p>Se você ativar a IA, os campos que a extensão não reconhece sozinha são enviados ao provedor que você escolheu (Google Gemini, Groq, OpenRouter, Ollama Cloud ou Ollama no seu computador), usando a sua própria chave. O que vai na requisição:</p>
+    <ul>
+      <li>o rótulo, o placeholder, o nome interno e o tipo de cada campo (por exemplo “E-mail” ou “Como devemos te chamar?”);</li>
+      <li>a lista de tipos de dado que a extensão conhece (nome, e-mail, CPF etc.).</li>
+    </ul>
+    <p><b>Seus dados pessoais nunca são enviados.</b> O provedor de IA responde apenas qual tipo de dado cada campo pede. O uso dessas requisições pelo provedor segue a política de privacidade dele. Com o Ollama local, nada sai do seu computador.</p>
+
+    <h2>Compartilhamento e venda</h2>
+    <p>O AutoFill IA não vende, não aluga e não compartilha dados com ninguém. Também não usa os dados para publicidade, análise de crédito ou qualquer finalidade além de preencher formulários.</p>
+
+    <h2>Controle e exclusão</h2>
+    <ul>
+      <li>Apague ou altere qualquer dado na página de configurações da extensão.</li>
+      <li>Use “Limpar cache de campos aprendidos” para apagar o que foi identificado nos sites.</li>
+      <li>Desinstalar a extensão apaga todos os dados guardados por ela.</li>
+      <li>Você pode desligar a extensão em sites específicos com “Ignorar este site”.</li>
+    </ul>
+
+    <h2>Permissões do navegador</h2>
+    <ul>
+      <li><b>Acesso aos sites:</b> necessário para encontrar e preencher formulários em qualquer página.</li>
+      <li><b>storage:</b> guardar seu perfil e configurações localmente.</li>
+      <li><b>activeTab e scripting:</b> preencher a aba atual quando você clica no ícone ou usa o atalho.</li>
+    </ul>
+
+    <h2>Código aberto</h2>
+    <p>O código-fonte completo está em <a href="https://github.com/ManoelVilar/autofill-ia">github.com/ManoelVilar/autofill-ia</a>, então qualquer pessoa pode conferir o que a extensão faz.</p>
+
+    <h2>Contato</h2>
+    <p>Dúvidas sobre esta política: abra uma issue em <a href="https://github.com/ManoelVilar/autofill-ia/issues">github.com/ManoelVilar/autofill-ia/issues</a>.</p>
+  </article>
+
+  <footer>Se esta política mudar, a nova versão será publicada nesta página com a data atualizada.</footer>
+</div>
+</body>
+</html>
